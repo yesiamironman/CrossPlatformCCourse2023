@@ -3,36 +3,46 @@
 
 #define WIDTH 400
 #define HEIGHT 300
+#define FRAMERATE 60
+int x = 0;
 
-int x=0;
-
-void draw(SDL_Surface *screen,SDL_Window *win){
+void draw(SDL_Surface *screen, SDL_Window *win) {
     x++;
 
-    SDL_Rect r = {0,0,WIDTH,HEIGHT};
-    SDL_FillRect(screen,&r,0xffffffff);//ARGB
-    SDL_Rect redRect = {x,0,100,100};
-    SDL_FillRect(screen,&redRect,0xffff0000);
+    SDL_Rect r = {0, 0, WIDTH, HEIGHT};
+    SDL_FillRect(screen, &r, 0xffffffff);//ARGB
+    SDL_Rect redRect = {x, 0, 100, 100};
+    SDL_FillRect(screen, &redRect, 0xffff0000);
 /*    for(int i=0;i<100;i++){
         ((uint32_t *)(screen->pixels))[WIDTH*50+50+i] = 0xff0000ff;
     }*/
 
     SDL_UpdateWindowSurface(win);
 }
-void event_loop(SDL_Surface *screen,SDL_Window *win) {
+
+void event_loop(SDL_Surface *screen, SDL_Window *win) {
     while (1) {
-        draw(screen,win);
+        long begin = SDL_GetTicks();
+        draw(screen, win);
 
         SDL_Event event;
-        if (SDL_PollEvent(&event)) {
-            printf("event type, %d\n", event.type );
+        while (SDL_PollEvent(&event)) {
+            printf("event type, %d\n", event.type);
             printf("SDL_QUIT=%d", SDL_QUIT);
             printf("SDL_APP_TERMINATING=%d", SDL_APP_TERMINATING);
             if (event.type == SDL_QUIT) {
-                break;
+                return;
             }
         }
-        SDL_Delay(1000);
+        long current = SDL_GetTicks();
+        long cost = current - begin;
+        long frame = 1000 / FRAMERATE;
+        long delay = frame - cost;
+
+        if (delay > 0) {
+            SDL_Delay(delay);
+        }
+
     }
 }
 
@@ -52,7 +62,7 @@ int main() {
 
 
     SDL_Surface *screen = SDL_GetWindowSurface(win);
-    event_loop(screen,win);
+    event_loop(screen, win);
     SDL_DestroyWindow(win);
 
 
